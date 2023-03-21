@@ -1,0 +1,20 @@
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+
+
+
+# Create your models here.
+class Customer(AbstractUser):
+    class Meta:
+        verbose_name_plural = "Customers"
+        
+    first_name = models.CharField(max_length=200)
+    last_name = models.CharField(max_length=200)
+    username = models.EmailField(unique=True, null=True)
+    password = models.CharField(max_length=20)
+    contact = models.CharField(max_length=200)
+    state = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    is_verified=models.BooleanField(default=False)
+    otp=models.CharField(max_length=6,null=True,blank=True)
+    REQUIRED_FIELDS= []
