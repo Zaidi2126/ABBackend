@@ -7,5 +7,6 @@ urlpatterns = [
     path('mainform',RegisterMainForm.as_view()),
     path('miniform',RegisterMiniForm.as_view()),
     path('accept_miniform',AcceptMiniForm.as_view()),
+    # path('create',create.as_view()),
 
 ]
