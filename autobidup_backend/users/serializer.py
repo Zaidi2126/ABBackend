@@ -4,7 +4,7 @@ from .models import Customer
 class UserSerializer( serializers.ModelSerializer):
     class Meta:
         model=Customer
-        fields=['last_name','first_name','username','password','contact','state','city']
+        fields=['last_name','first_name','username','password','contact','state','city','entred_bidding_room_id','current_bid']
         extra_kwargs={
             'password':{'write_only':True}
         }

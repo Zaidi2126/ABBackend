@@ -15,6 +15,8 @@ class Customer(AbstractUser):
     contact = models.CharField(max_length=200)
     state = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
+    current_bid = models.CharField(max_length=200,default='',blank=True)
+    entred_bidding_room_id = models.CharField(max_length=200,default='',blank=True)
     is_verified=models.BooleanField(default=False)
     otp=models.CharField(max_length=6,null=True,blank=True)
     REQUIRED_FIELDS= []

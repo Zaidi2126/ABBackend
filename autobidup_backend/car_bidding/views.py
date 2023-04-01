@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from .serializer import CarSerializer,CalenderSerializer
+from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import bidding_car,key_generator,bidding_calender
+from .models import bidding_car,key_generator,bidding_calender,bidding_room,room_generator
 from users.models import Customer
 from users.serializer import UserSerializer
 from rest_framework.exceptions import AuthenticationFailed
@@ -72,6 +73,7 @@ class RegisterMainForm(APIView):
         ad_descriptionx=request.data['ad_descriptionx']
         bid_datx=request.data['bid_datx']
         bid_timex=request.data['bid_timex']
+        starting_bid=request.data['staring_bid']+' rps'
 
 
         if 'airbagsx' in request.data:
@@ -110,11 +112,12 @@ class RegisterMainForm(APIView):
         car.transmission =transmissionx
         car.assembly =assemblyx
         car.ad_title =ad_titlex
+        car.starting_bid =starting_bid
         car.ad_description =ad_descriptionx
         car.bid_date =bid_datx
         car.bid_time =bid_timex
         car.save()
-        creates(car)
+        create_bidding_calender(car)
         return Response({
             'asd':'asd'
         })
@@ -140,9 +143,32 @@ class AcceptMiniForm(APIView):
         })
 
 
+# def date_diff(future_date_str):
+#     today = datetime.today()
+#     future_date = datetime.strptime(future_date_str, '%Y-%m-%d')
+#     diff = future_date - today
+#     return diff.days
+
+# def time_diff(future_time_str):
+#     today = datetime.now().time()
+#     future_time = datetime.strptime(future_time_str, '%H:%M:%S').time()
+#     diff = datetime.combine(datetime.today(), future_time) - datetime.combine(datetime.today(), today)
+#     return diff
 
 
-def creates(car):
+
+def datetime_diff(future_date_str, future_time_str):
+    today = datetime.datetime.now()
+    future_datetime_str = f"{future_date_str} {future_time_str}"
+    future_datetime = datetime.datetime.strptime(future_datetime_str, '%Y-%m-%d %H:%M:%S')
+    diff = future_datetime - today
+    return str(diff)
+
+
+
+
+
+def create_bidding_calender(car):
     new_car=bidding_calender.objects.create()
     new_car.automatic_generated_bid_id=car.automatic_generated_bid_id
     new_car.chassis_no =car.chassis_no 
@@ -160,6 +186,8 @@ def creates(car):
     new_car.ad_description =car.ad_description 
     new_car.bid_time =car.bid_time 
     new_car.bid_date =car.bid_date 
+    new_car.starting_bid =car.starting_bid 
+    new_car.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
     new_car.airbags =car.airbags 
     new_car.alloy_wheels =car.alloy_wheels 
     new_car.immoblizer =car.immoblizer 
@@ -168,7 +196,19 @@ def creates(car):
     new_car.folding_seats =car.folding_seats 
     new_car.power_door_locks =car.power_door_locks 
     new_car.antibrakingsystem =car.antibrakingsystem 
+    # new_car.bid_time_down=time_diff()
     new_car.save()
+
+class difference_of_time(APIView):
+    def post(self,request):
+        bid_id=request.data['bids']
+        car=bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
+        time_left=datetime_diff(car.bid_date,car.bid_time)
+
+        return Response({
+            'remainingtime':time_left
+        })
+
 
 class show_all_bidding_cars(ListAPIView):
     queryset=bidding_car.objects.all()
@@ -194,3 +234,124 @@ class search_all_bidding_cars(ListAPIView):
     search_fields=['automatic_generated_bid_id','name','phone_no','chassis_no','engine_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','car_location','miniform_approved','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
 
 
+class allot_bidding_room(APIView):
+    def post(self,request):
+        automatic_generated_bid_id=request.data['bids']
+        car=bidding_car.objects.filter(automatic_generated_bid_id=automatic_generated_bid_id).first()
+
+        if len(car.room_id) > 1:
+            raise AuthenticationFailed('Room already alloted')
+        else:
+            pass
+        new_room=bidding_room.objects.create()    
+        new_room.room_id=room_generator()
+        new_room.automatic_generated_bid_id=car.automatic_generated_bid_id
+        new_room.year =car.year 
+        new_room.make =car.make 
+        new_room.model =car.model 
+        new_room.mileage =car.mileage 
+        new_room.modified =car.modified 
+        new_room.car_type =car.car_type 
+        new_room.engine_type =car.engine_type 
+        new_room.engine_capacity =car.engine_capacity 
+        new_room.transmission =car.transmission 
+        new_room.assembly =car.assembly 
+        new_room.ad_title =car.ad_title 
+        new_room.ad_description =car.ad_description 
+        new_room.bid_time =car.bid_time 
+        new_room.bid_date =car.bid_date 
+        new_room.starting_bid =car.starting_bid 
+        new_room.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
+        new_room.increase_bid='50000'
+        new_room.current_bid='0'
+        # new_room.current_bid=new_room.increase_bid
+        new_room.save()
+        car.room_id_alloted=True
+        car.room_id=new_room.room_id
+        car.save()
+
+        return Response({
+            'room_id_alloted':car.room_id
+        })
+    
+
+class enter_bidding_room(APIView):
+    def post(self,request):
+        token=request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        try:
+            payload=jwt.decode(token,'secret',algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        user=Customer.objects.filter(username=payload['username']).first()
+        bid_id=request.data['bids']
+        car=bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
+        user.entred_bidding_room_id=car.room_id
+        user.current_bid='0'
+        user.save()
+        return Response({
+            'room entered':user.entred_bidding_room_id
+        })
+
+
+class exit_bidding_room(APIView):
+    def post(self,request):
+        token=request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        try:
+            payload=jwt.decode(token,'secret',algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        user=Customer.objects.filter(username=payload['username']).first()
+        user.entred_bidding_room_id=''
+        user.save()
+        return Response({
+            'room entered':user.entred_bidding_room_id
+        })
+    
+
+class increase_bid(APIView):
+    def post(self,request):
+        token=request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        try:
+            payload=jwt.decode(token,'secret',algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        user=Customer.objects.filter(username=payload['username']).first()
+        room_ids=user.entred_bidding_room_id
+        print(room_ids)
+        room=bidding_room.objects.filter(room_id=room_ids).first()
+        user.current_bid=int(user.current_bid)+int(room.increase_bid)
+        user.save()
+        if int(room.current_bid) < int(user.current_bid):
+            room.current_bid=user.current_bid
+            room.save()
+        
+        highest_bidder_obj=check_highest_bid(room.room_id)
+        print(highest_bidder_obj.first_name)
+        user.current_bid='989898989898989898989898989898989'
+        if int(user.current_bid) > int(highest_bidder_obj.current_bid):
+            room.highest_bidder=user.first_name
+            room.higest_bid=user.current_bid
+            room.save()
+        
+        
+        return Response({
+            'username':user.first_name,
+            'current bid':user.current_bid,
+            'room highest bid':room.higest_bid,
+        })
+
+def check_highest_bid(room_id):
+    room=bidding_room.objects.filter(room_id=room_id).first()
+    print(room.higest_bid)
+    all_users=Customer.objects.filter(entred_bidding_room_id=room_id).all()
+    for user in all_users:
+        if user.current_bid==room.higest_bid:
+            room.highest_bidder=user.first_name
+            room.save()
+            return user
