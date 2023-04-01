@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
-    'bidding',
+    'car_bidding',
     'accessorie',
     'rest_framework',
     'corsheaders',
