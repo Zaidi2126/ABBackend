@@ -28,7 +28,6 @@ class bidding_car(models.Model):
     car_type = models.CharField(max_length=100)
     car_location = models.CharField(max_length=100)
     miniform_approved = models.BooleanField(default=False)
-    
     engine_type = models.CharField(max_length=100, default='', blank=True, validators=[validate_miniform_approved])
     engine_capacity = models.CharField(max_length=100, default='', blank=True, validators=[validate_miniform_approved])
     transmission = models.CharField(max_length=100, default='', blank=True, validators=[validate_miniform_approved])

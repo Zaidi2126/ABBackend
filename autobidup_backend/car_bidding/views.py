@@ -1,5 +1,5 @@
 from django.shortcuts import render
-# from .serializer import TicketSerializer,MechanicSerializer,ServiceSerializer
+from .serializer import CarSerializer,CalenderSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import bidding_car,key_generator,bidding_calender
@@ -170,5 +170,27 @@ def creates(car):
     new_car.antibrakingsystem =car.antibrakingsystem 
     new_car.save()
 
-    new_car.save()
-    
+class show_all_bidding_cars(ListAPIView):
+    queryset=bidding_car.objects.all()
+    serializer_class=CarSerializer
+
+
+class show_bidding_calender(ListAPIView):
+    queryset=bidding_calender.objects.all()
+    serializer_class=CalenderSerializer
+
+
+class search_bidding_calender(ListAPIView):
+    queryset=bidding_calender.objects.all()
+    serializer_class=CalenderSerializer
+    filter_backends=[SearchFilter]
+    search_fields=['automatic_generated_bid_id','chassis_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
+
+
+class search_all_bidding_cars(ListAPIView):
+    queryset=bidding_car.objects.all()
+    serializer_class=CarSerializer
+    filter_backends=[SearchFilter]
+    search_fields=['automatic_generated_bid_id','name','phone_no','chassis_no','engine_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','car_location','miniform_approved','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
+
+
