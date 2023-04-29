@@ -19,9 +19,6 @@ class RegisterView(APIView):
         send_otp_via_email(serializer.data['username'])
         return Response(serializer.data)
     
-
-
-
 class LoginView(APIView):
     def post(self,request):
         username=request.data['username']
