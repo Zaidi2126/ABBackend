@@ -20,5 +20,9 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('users.urls')),
     path('bidding/',include('car_bidding.urls')),
+<<<<<<< HEAD
+    path('mechanic/',include('Mechanic.urls')),
+=======
     path('store/',include('accessorie.urls')),
+>>>>>>> 6d3cb699150b1bcaf742cc8842fe944a8de0115c
 ]

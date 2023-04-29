@@ -19,6 +19,9 @@ class RegisterView(APIView):
         send_otp_via_email(serializer.data['username'])
         return Response(serializer.data)
     
+
+from django.forms.models import model_to_dict
+
 class LoginView(APIView):
     def post(self,request):
         username=request.data['username']
@@ -26,7 +29,6 @@ class LoginView(APIView):
         user=Customer.objects.filter(username=username).first()
         # passs=user.password
        
-
         if user is None:
             raise AuthenticationFailed('Wrong email')
         if not user.check_password(password):
@@ -49,7 +51,7 @@ class LoginView(APIView):
             'firstName':user.first_name,
             'lastName':user.last_name,
             'username':user.username,
-            'username':user,
+            'user': model_to_dict(user),
         }
 
         return response
