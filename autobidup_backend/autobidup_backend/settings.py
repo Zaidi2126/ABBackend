@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'accessorie',
     'rest_framework',
     'corsheaders',
+    'Mechanic',
 
 ]
 
