@@ -20,7 +20,7 @@ class RegisterView(APIView):
         return Response(serializer.data)
     
 
-
+from django.forms.models import model_to_dict
 
 from django.forms.models import model_to_dict
 class LoginView(APIView):
@@ -29,6 +29,10 @@ class LoginView(APIView):
         password=request.data['password']
         user=Customer.objects.filter(username=username).first()
         # passs=user.password
+<<<<<<< HEAD
+=======
+       
+>>>>>>> 295a18cf169b6bc81057b1c35c02db8fae931637
         if user is None:
             raise AuthenticationFailed('Wrong email')
         if not user.check_password(password):

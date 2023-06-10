@@ -13,6 +13,8 @@ import jwt,datetime
 from django.template import loader
 from rest_framework.filters import SearchFilter
 
+
+
 class RegisterMiniForm(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
@@ -348,10 +350,11 @@ class increase_bid(APIView):
 
 def check_highest_bid(room_id):
     room=bidding_room.objects.filter(room_id=room_id).first()
-    print(room.higest_bid)
     all_users=Customer.objects.filter(entred_bidding_room_id=room_id).all()
     for user in all_users:
         if user.current_bid==room.higest_bid:
             room.highest_bidder=user.first_name
             room.save()
             return user
+
+
