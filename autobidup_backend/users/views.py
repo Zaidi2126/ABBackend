@@ -22,39 +22,34 @@ class RegisterView(APIView):
 
 
 
+from django.forms.models import model_to_dict
 class LoginView(APIView):
     def post(self,request):
         username=request.data['username']
-        password=request.data['password']     
+        password=request.data['password']
         user=Customer.objects.filter(username=username).first()
         # passs=user.password
-       
-
         if user is None:
             raise AuthenticationFailed('Wrong email')
         if not user.check_password(password):
             raise AuthenticationFailed('Wrong password')
         if user.is_verified==False:
             raise AuthenticationFailed('Please verify your account')
-        
         payload={
             'username':user.username,
             'exp':datetime.datetime.utcnow()+datetime.timedelta(minutes=2222),
             'iat':datetime.datetime.utcnow()
-
         }
-
         token=jwt.encode(payload,'secret',algorithm='HS256')
-        response=Response() 
+        response=Response()
         response.set_cookie(key='jwt',value=token,httponly=True)
         response.data={
             'jwt':token,
             'firstName':user.first_name,
             'lastName':user.last_name,
             'username':user.username,
-            'username':user,
+            'user': model_to_dict(user),
         }
-
         return response
 
 
