@@ -15,7 +15,9 @@ import jwt,datetime
 from django.template import loader
 from rest_framework.filters import SearchFilter
 from rest_framework import generics, filters
-# from django_filters.rest_framework import DjangoFilterBackend
+
+from django_filters.rest_framework import DjangoFilterBackend
+
 
 class show_all_products(ListAPIView):
     queryset=Products.objects.all()
@@ -24,18 +26,11 @@ class show_all_products(ListAPIView):
 class search_products(generics.ListAPIView):
     queryset=Products.objects.all()
     serializer_class=StoreSerializer
-    filter_backends = [filters.SearchFilter]
-    # filter_backends = [filters.SearchFilter, DjangoFilterBackend]
+    filter_backends = [filters.SearchFilter, DjangoFilterBackend]
     search_fields = ['pname', 'price', 'ptype']
-    # filterset_fields = {
-    #     'price': ['gte', 'lte'],
-    # }
-
-class product_type(generics.ListAPIView):
-    queryset=Products.objects.all()
-    serializer_class=StoreSerializer
-    filter_backends=[filters.SearchFilter]
-    search_fields = ['ptype']
+    filterset_fields = {
+        'price': ['gte', 'lte'],  
+    }
 
 class place_order(APIView):
     def post(self,request):
