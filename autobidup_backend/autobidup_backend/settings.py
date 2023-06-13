@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-tb+^8vmcnw1+v^ni18da*gs&vo#at+a^8u3!=6v)tqc2mg-mjy
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [ 'autobidup.pythonanywhere.com']
 
 
 # Application definition
@@ -122,8 +122,10 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
-
+import os
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static')
+
 
 
 # Default primary key field type
@@ -148,8 +150,55 @@ EMAIL_PORT=587
 EMAIL_HOST_USER= 'autobidup@gmail.com'
 EMAIL_HOST_PASSWORD= 'erimfvwexmmemdvk'
 
+CORS_ALLOW_CREDENTIALS=True
 
 
+CORS_ALLOWED_ORIGINS= [
+    'http://localhost:7777'
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'access-control-allow-origin',
+    'access-control-allow-credentials',
+]
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:7777',
+]
+CSRF_COOKIE_DOMAIN = 'http://localhost:7777'
+
+
+
+
+
+
+
+AWS_ACCESS_KEY_ID = 'AKIARRAQBYG6AISHDKXG'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'autobidup1'
+AWS_S3_SIGNATURE_NAME = 's3v4',
+AWS_S3_REGION_NAME = 'us-east-1'
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL =  None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
 

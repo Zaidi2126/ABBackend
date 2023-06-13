@@ -18,9 +18,7 @@ class RegisterView(APIView):
         serializer.save()
         send_otp_via_email(serializer.data['username'])
         return Response(serializer.data)
-    
 
-from django.forms.models import model_to_dict
 
 from django.forms.models import model_to_dict
 class LoginView(APIView):
@@ -44,7 +42,7 @@ class LoginView(APIView):
         }
         token=jwt.encode(payload,'secret',algorithm='HS256')
         response=Response()
-        response.set_cookie(key='jwt',value=token,httponly=True)
+        response.set_cookie(key='jwt',value=token,httponly=True, domain='autobidup.pythonanywhere.com', secure=True, samesite='None',max_age=86400)
         response.data={
             'jwt':token,
             'firstName':user.first_name,
@@ -58,7 +56,7 @@ class LoginView(APIView):
 
 class CustomerView(APIView):
     def get(self,request):
-        
+
         token=request.COOKIES.get('jwt')
         if not token:
             raise AuthenticationFailed('NOT AUTHENTICATED')
@@ -69,11 +67,11 @@ class CustomerView(APIView):
 
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
-        
+
 
 
         return Response(serializer.data)
-        
+
 
 
 
@@ -90,16 +88,16 @@ class ChangePasswordView(APIView):
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
 
-        username=request.data['username']     
-        password=request.data['password']     
-        new_password=request.data['new_password']     
-        re_enter_new_password=request.data['re_enter_new_password']     
+        username=request.data['username']
+        password=request.data['password']
+        new_password=request.data['new_password']
+        re_enter_new_password=request.data['re_enter_new_password']
         user=Customer.objects.filter(username=username).first()
         if user is None:
             raise AuthenticationFailed('Wrong email')
         if not user.check_password(password):
             raise AuthenticationFailed('Wrong password')
-        
+
         if new_password == re_enter_new_password:
             user=Customer.objects.filter(username=username).first()
             user.set_password(new_password)
@@ -128,33 +126,33 @@ class UpdateInfoView(APIView):
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
         username=user.username
-         
-        if 'last_name' in request.data: 
-            nlast_name=request.data['last_name']     
+
+        if 'last_name' in request.data:
+            nlast_name=request.data['last_name']
             user=Customer.objects.filter(username=username).update(last_name=nlast_name)
-        if 'first_name' in request.data: 
-            nfirst_name=request.data['first_name']     
+        if 'first_name' in request.data:
+            nfirst_name=request.data['first_name']
             user=Customer.objects.filter(username=username).update(first_name=nfirst_name)
-        if 'contact' in request.data: 
-            ncontact=request.data['contact']     
+        if 'contact' in request.data:
+            ncontact=request.data['contact']
             user=Customer.objects.filter(username=username).update(contact=ncontact)
-        if 'state' in request.data: 
-            nstate=request.data['state'] 
+        if 'state' in request.data:
+            nstate=request.data['state']
             user=Customer.objects.filter(username=username).update(state=nstate)
-        if 'city' in request.data: 
-            ncity=request.data['city']   
+        if 'city' in request.data:
+            ncity=request.data['city']
             user=Customer.objects.filter(username=username).update(city=ncity)
-        if 'zip' in request.data: 
-            nzip=request.data['zip']     
+        if 'zip' in request.data:
+            nzip=request.data['zip']
             user=Customer.objects.filter(username=username).update(zip=nzip)
-        if 'street' in request.data: 
-            nstreet=request.data['street']       
+        if 'street' in request.data:
+            nstreet=request.data['street']
             user=Customer.objects.filter(username=username).update(street=nstreet)
 
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
-        
-        
+
+
         return Response(serializer.data)
 
 
@@ -196,4 +194,3 @@ class VerifyOTP(APIView):
                 })
         except Exception as e:
             print(e)
-            
