@@ -22,4 +22,5 @@ urlpatterns = [
     path('bidding/',include('car_bidding.urls')),
     path('mechanic/',include('Mechanic.urls')),
     path('store/',include('accessorie.urls')),
+    path('cars/',include('usedcars.urls')),
 ]

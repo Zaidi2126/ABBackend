@@ -4,10 +4,10 @@ from .models import Products, Order
 
 
 class accessories_car_Admin(admin.ModelAdmin):
-    list_display = ["pid","pname", "images", "price", "description","ptype"]
+    list_display = ["pid","pname", "images", "price", "description","ptype","quantity"]
 
 class order_car_Admin(admin.ModelAdmin):
-    list_display = ["oid","cname", "fname", "lname", "address","city","phone","email","zipcode","price","date","product_ids"]
+    list_display = ["oid","cname", "fname", "lname", "address","city","phone","email","zipcode","price","date","product_ids","quantity","status"]
 
 admin.site.register(Products, accessories_car_Admin)
 admin.site.register(Order, order_car_Admin)

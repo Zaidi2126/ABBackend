@@ -13,9 +13,11 @@ class Products(models.Model):
     pid = models.CharField(max_length=5)
     pname = models.CharField(max_length=100)
     images = models.ImageField(upload_to='product_images')
+    # image_urls = models.FileField(null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.TextField()
     ptype = models.CharField(max_length=5, blank=True)
+    quantity = models.PositiveIntegerField(null=True)
 
 class Order(models.Model):
     oid = models.CharField(max_length=5)
@@ -30,3 +32,11 @@ class Order(models.Model):
     price = models.CharField(max_length=100)
     date = models.DateField()
     product_ids = models.CharField(max_length=100)
+    quantity = models.CharField(max_length=100, null=True)
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
