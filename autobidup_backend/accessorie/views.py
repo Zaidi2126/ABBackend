@@ -27,10 +27,16 @@ class search_products(generics.ListAPIView):
     queryset=Products.objects.all()
     serializer_class=StoreSerializer
     filter_backends = [filters.SearchFilter, DjangoFilterBackend]
-    search_fields = ['pname', 'price', 'ptype']
+    search_fields = ['pname', 'price']
     filterset_fields = {
-        'price': ['gte', 'lte'],  
+        'price': ['gte', 'lte'],
     }
+
+class search_product_type(generics.ListAPIView):
+    queryset=Products.objects.all()
+    serializer_class=StoreSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['ptype']
 
 class place_order(APIView):
     def post(self,request):
@@ -41,7 +47,7 @@ class place_order(APIView):
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
-        
+
         product_ids = request.data.get('product_ids', [])
         quantities = request.data.get('quantity', [])
 
@@ -78,13 +84,13 @@ class place_order(APIView):
         # Ostatus = "Pending"
         key=key_generator()
         Okey='O'+str(key)
-        
+
         new_recd=Order(oid=Okey,cname=Ocname,fname=Ofname,lname=Olname,address=Oaddress,city=Ocity,phone=Ophone,email=Oemail,zipcode=Ozipcode,price=Oprice,date=Odate, product_ids=Opid, quantity=Oquantity)
         new_recd.save()
         return Response({
             'message':'order placed successfully!'
         })
-    
+
 
 
 class CancelOrder(APIView):
