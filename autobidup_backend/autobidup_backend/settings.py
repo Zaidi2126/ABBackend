@@ -184,8 +184,7 @@ CORS_ALLOW_METHODS = [
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:7777',
 ]
-CSRF_COOKIE_DOMAIN = 'http://localhost:7777'
-
+CSRF_COOKIE_DOMAIN = 'autobidup.pythonanywhere.com'
 
 
 
@@ -203,15 +202,12 @@ AWS_S3_VERITY = True
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 
-
-
-
-
-
-
-
-
-
+# token for github
+# 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
+# google api key
+# AIzaSyD1LJllzMdfBkQHtlxowo2Vte1EG_Q6098
+# aws password
+# autoBidUp@101
 
 # username and pass for admin
 # admin@123.com

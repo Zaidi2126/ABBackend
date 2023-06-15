@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from grpc import Status
 from .serializer import UsedCarsSerializer
 from datetime import datetime
 from rest_framework.views import APIView
@@ -93,7 +92,7 @@ class create_post(APIView):
         return Response({
             'message':'post created successfully!'
         })
-    
+
 class remove_post(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
@@ -103,7 +102,7 @@ class remove_post(APIView):
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
-        
+
         cid=request.data['cid']
         mt=UsedCars.objects.filter(cid=cid)
         print(mt)
@@ -111,7 +110,7 @@ class remove_post(APIView):
         return Response({
            "post deleted"
         })
-    
+
 class edit_post(APIView):
     def post(self, request):
         token=request.COOKIES.get('jwt')
@@ -121,10 +120,10 @@ class edit_post(APIView):
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
-        
+
         cid=request.data['cid']
         existing_post = UsedCars.objects.get(cid=cid)
-    
+
         existing_post.bodytype = request.data.get('bodytype', existing_post.bodytype)
         existing_post.reg_city = request.data.get('reg_city', existing_post.reg_city)
         existing_post.city = request.data.get('city', existing_post.city)
@@ -165,5 +164,5 @@ class edit_post(APIView):
         existing_post.armrests = request.data.get('armrests', existing_post.armrests)
 
         existing_post.save()
-        
+
         return Response({'message': 'Post updated successfully'})
