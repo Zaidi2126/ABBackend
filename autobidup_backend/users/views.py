@@ -1,14 +1,11 @@
-from django.shortcuts import render
-from rest_framework.views import APIView
-from .serializer import UserSerializer,VerifyAccountSerializer
-from rest_framework.response import Response
-from .models import Customer
-from rest_framework.exceptions import AuthenticationFailed
 import jwt,datetime
+from .models import Customer
 from .emails import send_otp_via_email
-
-# Create your views here.
-
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.forms.models import model_to_dict
+from rest_framework.exceptions import AuthenticationFailed
+from .serializer import UserSerializer,VerifyAccountSerializer
 
 
 class RegisterView(APIView):
@@ -20,15 +17,13 @@ class RegisterView(APIView):
         return Response(serializer.data)
 
 
-from django.forms.models import model_to_dict
 class LoginView(APIView):
     def post(self,request):
         username=request.data['username']
         password=request.data['password']
         user=Customer.objects.filter(username=username).first()
         # passs=user.password
-
-# 295a18cf169b6bc81057b1c35c02db8fae931637
+        # 295a18cf169b6bc81057b1c35c02db8fae931637
         if user is None:
             raise AuthenticationFailed('Wrong email')
         if not user.check_password(password):
@@ -53,7 +48,6 @@ class LoginView(APIView):
         return response
 
 
-
 class CustomerView(APIView):
     def get(self,request):
 
@@ -63,14 +57,24 @@ class CustomerView(APIView):
         try:
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('NOT AUTHENTICATED')
+            raise AuthenticationFailed('NOT AUTHENTICATEsD')
 
         user=Customer.objects.filter(username=payload['username']).first()
-        serializer=UserSerializer(user)
+        # serializer=UserSerializer(useruser
+        return Response({
+                    'username':user.username,
+                    'first_name':user.first_name,
+                    'last_name':user.last_name,
+                    'contact':user.contact,
+                    'state':user.state,
+                    'city':user.city,
+                    'currentbid':user.current_bid,
+                    'alloted_mechanic':user.alloted_mechanic,
+                    'entered_bidding_room':user.entred_bidding_room_id,
+                    'call_credit':user.call_credit,
 
 
-
-        return Response(serializer.data)
+                })
 
 
 
@@ -112,7 +116,6 @@ class ChangePasswordView(APIView):
         })
 
 
-
 class UpdateInfoView(APIView):
     def post(self,request):
        #JWT AUTHERNTICATION
@@ -126,7 +129,6 @@ class UpdateInfoView(APIView):
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
         username=user.username
-
         if 'last_name' in request.data:
             nlast_name=request.data['last_name']
             user=Customer.objects.filter(username=username).update(last_name=nlast_name)
@@ -148,13 +150,10 @@ class UpdateInfoView(APIView):
         if 'street' in request.data:
             nstreet=request.data['street']
             user=Customer.objects.filter(username=username).update(street=nstreet)
-
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
 
-
         return Response(serializer.data)
-
 
 
 class VerifyOTP(APIView):

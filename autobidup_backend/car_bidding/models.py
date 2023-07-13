@@ -1,24 +1,28 @@
-from django.db import models
-from django.core.exceptions import ValidationError
 import random
 import string
+from django.db import models
 from datetime import datetime
+from django.core.exceptions import ValidationError
 
 
-# Create your models here.
 def key_generator():
     key = ''.join(random.choice(string.digits) for x in range(4))
     if bidding_car.objects.filter(automatic_generated_bid_id=key).exists():
         key = key_generator()
     return key
+
+
 def room_generator():
     key = ''.join(random.choice(string.digits) for x in range(3))
     if bidding_room.objects.filter(room_id=key).exists():
         key = key_generator()
     return key
+
+
 def validate_miniform_approved(value):
     if not value:
         raise ValidationError('Please approve mini form first.')
+
 
 class bidding_car(models.Model):
     name = models.CharField(max_length=100)
@@ -83,6 +87,7 @@ class bidding_calender(models.Model):
     antibrakingsystem = models.BooleanField(default=False, validators=[validate_miniform_approved])
     bid_datetime_left = models.CharField(max_length=100, default='' ,blank=True)
 
+
 class bidding_room(models.Model):
     room_id = models.CharField(max_length=3)
     automatic_generated_bid_id = models.CharField(max_length=100, default='' ,blank=True)
@@ -104,6 +109,3 @@ class bidding_room(models.Model):
     highest_bidder=models.CharField(max_length=100, default='' ,blank=True)
     bid_winner = models.CharField(max_length=100, default='' ,blank=True)
     current_bid = models.CharField(max_length=100, default='' ,blank=True)
-
-
-

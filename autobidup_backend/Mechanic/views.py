@@ -1,26 +1,24 @@
-from django.shortcuts import render
-from .serializer import mechanicSerializer,mechanicTicketSerializer,expertSerializer
-from datetime import datetime
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import Mechanic,Mechanic_ticket,key_generator,Expert
-from users.serializer import UserSerializer
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.generics import ListAPIView
-from django.contrib.auth.models import User
 import jwt,datetime
-from django.template import loader
-from rest_framework.filters import SearchFilter
+from datetime import datetime
 from users.models import Customer
+from django.template import loader
+from django.shortcuts import render
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from users.serializer import UserSerializer
+from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
+from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import AuthenticationFailed
+from .models import Mechanic,Mechanic_ticket,key_generator,Expert
+from .serializer import mechanicSerializer,mechanicTicketSerializer,expertSerializer
 
-# Create your views here.
 
 
 class show_mechanic(ListAPIView):
     queryset=Mechanic.objects.all()
     serializer_class=mechanicSerializer
     filter_backends=[SearchFilter]
-
 
 
 class Allot_mechanic(APIView):
@@ -56,7 +54,7 @@ class Allot_mechanic(APIView):
             'Success'
         })
 
-        
+
 class Remove_mechanic(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
@@ -91,7 +89,7 @@ class show_expert(ListAPIView):
     filter_backends=[SearchFilter]
 
 
-class buy_calls(ListAPIView):
+class buy_calls(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
         if not token:
@@ -100,15 +98,20 @@ class buy_calls(ListAPIView):
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
-        user=Customer.objects.filter(username=payload['username']).first()
-
-        cCredit=request.data['credit']
-        cCredit=int(cCredit)
-        user.call_credit=user.call_credit+cCredit
-        user.save()
-        return Response({
-        "call credit ":user.call_credit
-        })
+        user=Customer.objects.get(username=payload['username'])
+        try:
+            cCredit=request.data['credit']
+            cCredit=int(cCredit)
+            user.call_credit=user.call_credit+cCredit
+            user.save()
+            return Response({
+            "call credit ":user.call_credit
+            })
+        except Exception as e:
+            print(e)
+            return Response({
+            "message":"error"
+            })
 
 
 class request_call(APIView):

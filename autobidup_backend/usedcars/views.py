@@ -1,26 +1,24 @@
-from django.shortcuts import render
-from .serializer import UsedCarsSerializer
-from datetime import datetime
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import UsedCars,key_generator
-from users.models import Customer
-from users.serializer import UserSerializer
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.generics import ListAPIView
-from django.contrib.auth.models import User
 import jwt,datetime
+from datetime import datetime
+from users.models import Customer
 from django.template import loader
-from rest_framework.filters import SearchFilter
+from rest_framework.views import APIView
+from .models import UsedCars,key_generator
+from .serializer import UsedCarsSerializer
+from django.contrib.auth.models import User
+from users.serializer import UserSerializer
 from rest_framework import generics, filters
+from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+from rest_framework.exceptions import AuthenticationFailed
 from django_filters.rest_framework import DjangoFilterBackend
-
-# Create your views here.
 
 
 class show_all_cars(ListAPIView):
     queryset=UsedCars.objects.all()
     serializer_class = UsedCarsSerializer
+
 
 class search_cars(generics.ListAPIView):
     queryset=UsedCars.objects.all()
@@ -36,12 +34,14 @@ class search_cars(generics.ListAPIView):
 class create_post(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
+        print(token)
         if not token:
             raise AuthenticationFailed('NOT AUTHENTICATED')
         try:
             payload=jwt.decode(token,'secret',algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
+        print(request.data)
         user=Customer.objects.filter(username=payload['username']).first()
         serializer=UserSerializer(user)
         cname=serializer.data['username']
@@ -93,6 +93,7 @@ class create_post(APIView):
             'message':'post created successfully!'
         })
 
+
 class remove_post(APIView):
     def post(self,request):
         token=request.COOKIES.get('jwt')
@@ -110,6 +111,7 @@ class remove_post(APIView):
         return Response({
            "post deleted"
         })
+
 
 class edit_post(APIView):
     def post(self, request):

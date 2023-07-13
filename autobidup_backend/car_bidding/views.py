@@ -1,18 +1,13 @@
-from django.shortcuts import render
-from .serializer import CarSerializer,CalenderSerializer
-from datetime import datetime
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .models import bidding_car,key_generator,bidding_calender,bidding_room,room_generator
-from users.models import Customer
-from users.serializer import UserSerializer
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.generics import ListAPIView
-from django.contrib.auth.models import User
 import jwt,datetime
-from django.template import loader
+from users.models import Customer
+from rest_framework.views import APIView
+from users.serializer import UserSerializer
+from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
-
+from rest_framework.generics import ListAPIView
+from .serializer import CarSerializer,CalenderSerializer
+from rest_framework.exceptions import AuthenticationFailed
+from .models import bidding_car,key_generator,bidding_calender,bidding_room,room_generator
 
 
 class RegisterMiniForm(APIView):
@@ -48,7 +43,7 @@ class RegisterMiniForm(APIView):
         return Response({
             'asd':'asd'
         })
-    
+
 
 class RegisterMainForm(APIView):
     def post(self,request):
@@ -66,7 +61,7 @@ class RegisterMainForm(APIView):
             pass
         else:
             raise AuthenticationFailed('Mini Form not complete')
-        
+
         engine_typex=request.data['engine_typex']
         transmissionx=request.data['transmissionx']
         engine_capacityx=request.data['engine_capacityx']+' cc'
@@ -123,7 +118,6 @@ class RegisterMainForm(APIView):
         return Response({
             'asd':'asd'
         })
-    
 
 
 class AcceptMiniForm(APIView):
@@ -157,49 +151,6 @@ class AcceptMiniForm(APIView):
 #     diff = datetime.combine(datetime.today(), future_time) - datetime.combine(datetime.today(), today)
 #     return diff
 
-
-
-def datetime_diff(future_date_str, future_time_str):
-    today = datetime.datetime.now()
-    future_datetime_str = f"{future_date_str} {future_time_str}"
-    future_datetime = datetime.datetime.strptime(future_datetime_str, '%Y-%m-%d %H:%M:%S')
-    diff = future_datetime - today
-    return str(diff)
-
-
-
-
-
-def create_bidding_calender(car):
-    new_car=bidding_calender.objects.create()
-    new_car.automatic_generated_bid_id=car.automatic_generated_bid_id
-    new_car.chassis_no =car.chassis_no 
-    new_car.year =car.year 
-    new_car.make =car.make 
-    new_car.model =car.model 
-    new_car.mileage =car.mileage 
-    new_car.modified =car.modified 
-    new_car.car_type =car.car_type 
-    new_car.engine_type =car.engine_type 
-    new_car.engine_capacity =car.engine_capacity 
-    new_car.transmission =car.transmission 
-    new_car.assembly =car.assembly 
-    new_car.ad_title =car.ad_title 
-    new_car.ad_description =car.ad_description 
-    new_car.bid_time =car.bid_time 
-    new_car.bid_date =car.bid_date 
-    new_car.starting_bid =car.starting_bid 
-    new_car.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
-    new_car.airbags =car.airbags 
-    new_car.alloy_wheels =car.alloy_wheels 
-    new_car.immoblizer =car.immoblizer 
-    new_car.ac =car.ac 
-    new_car.cool_box =car.cool_box 
-    new_car.folding_seats =car.folding_seats 
-    new_car.power_door_locks =car.power_door_locks 
-    new_car.antibrakingsystem =car.antibrakingsystem 
-    # new_car.bid_time_down=time_diff()
-    new_car.save()
 
 class difference_of_time(APIView):
     def post(self,request):
@@ -245,24 +196,24 @@ class allot_bidding_room(APIView):
             raise AuthenticationFailed('Room already alloted')
         else:
             pass
-        new_room=bidding_room.objects.create()    
+        new_room=bidding_room.objects.create()
         new_room.room_id=room_generator()
         new_room.automatic_generated_bid_id=car.automatic_generated_bid_id
-        new_room.year =car.year 
-        new_room.make =car.make 
-        new_room.model =car.model 
-        new_room.mileage =car.mileage 
-        new_room.modified =car.modified 
-        new_room.car_type =car.car_type 
-        new_room.engine_type =car.engine_type 
-        new_room.engine_capacity =car.engine_capacity 
-        new_room.transmission =car.transmission 
-        new_room.assembly =car.assembly 
-        new_room.ad_title =car.ad_title 
-        new_room.ad_description =car.ad_description 
-        new_room.bid_time =car.bid_time 
-        new_room.bid_date =car.bid_date 
-        new_room.starting_bid =car.starting_bid 
+        new_room.year =car.year
+        new_room.make =car.make
+        new_room.model =car.model
+        new_room.mileage =car.mileage
+        new_room.modified =car.modified
+        new_room.car_type =car.car_type
+        new_room.engine_type =car.engine_type
+        new_room.engine_capacity =car.engine_capacity
+        new_room.transmission =car.transmission
+        new_room.assembly =car.assembly
+        new_room.ad_title =car.ad_title
+        new_room.ad_description =car.ad_description
+        new_room.bid_time =car.bid_time
+        new_room.bid_date =car.bid_date
+        new_room.starting_bid =car.starting_bid
         new_room.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
         new_room.increase_bid='50000'
         new_room.current_bid='0'
@@ -275,7 +226,7 @@ class allot_bidding_room(APIView):
         return Response({
             'room_id_alloted':car.room_id
         })
-    
+
 
 class enter_bidding_room(APIView):
     def post(self,request):
@@ -312,7 +263,7 @@ class exit_bidding_room(APIView):
         return Response({
             'room entered':user.entred_bidding_room_id
         })
-    
+
 
 class increase_bid(APIView):
     def post(self,request):
@@ -332,7 +283,7 @@ class increase_bid(APIView):
         if int(room.current_bid) < int(user.current_bid):
             room.current_bid=user.current_bid
             room.save()
-        
+
         highest_bidder_obj=check_highest_bid(room.room_id)
         print(highest_bidder_obj.first_name)
         user.current_bid='989898989898989898989898989898989'
@@ -340,8 +291,8 @@ class increase_bid(APIView):
             room.highest_bidder=user.first_name
             room.higest_bid=user.current_bid
             room.save()
-        
-        
+
+
         return Response({
             'username':user.first_name,
             'current bid':user.current_bid,
@@ -358,3 +309,41 @@ def check_highest_bid(room_id):
             return user
 
 
+def datetime_diff(future_date_str, future_time_str):
+    today = datetime.datetime.now()
+    future_datetime_str = f"{future_date_str} {future_time_str}"
+    future_datetime = datetime.datetime.strptime(future_datetime_str, '%Y-%m-%d %H:%M:%S')
+    diff = future_datetime - today
+    return str(diff)
+
+
+def create_bidding_calender(car):
+    new_car=bidding_calender.objects.create()
+    new_car.automatic_generated_bid_id=car.automatic_generated_bid_id
+    new_car.chassis_no =car.chassis_no
+    new_car.year =car.year
+    new_car.make =car.make
+    new_car.model =car.model
+    new_car.mileage =car.mileage
+    new_car.modified =car.modified
+    new_car.car_type =car.car_type
+    new_car.engine_type =car.engine_type
+    new_car.engine_capacity =car.engine_capacity
+    new_car.transmission =car.transmission
+    new_car.assembly =car.assembly
+    new_car.ad_title =car.ad_title
+    new_car.ad_description =car.ad_description
+    new_car.bid_time =car.bid_time
+    new_car.bid_date =car.bid_date
+    new_car.starting_bid =car.starting_bid
+    new_car.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
+    new_car.airbags =car.airbags
+    new_car.alloy_wheels =car.alloy_wheels
+    new_car.immoblizer =car.immoblizer
+    new_car.ac =car.ac
+    new_car.cool_box =car.cool_box
+    new_car.folding_seats =car.folding_seats
+    new_car.power_door_locks =car.power_door_locks
+    new_car.antibrakingsystem =car.antibrakingsystem
+    # new_car.bid_time_down=time_diff()
+    new_car.save()
