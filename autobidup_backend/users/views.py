@@ -37,7 +37,7 @@ class LoginView(APIView):
         }
         token=jwt.encode(payload,'secret',algorithm='HS256')
         response=Response()
-        response.set_cookie(key='jwt',value=token,httponly=True, domain='autobidup.pythonanywhere.com', secure=True, samesite='None',max_age=86400)
+        response.set_cookie(key='jwt',value=token,httponly=True, domain='autobidup.pythonanywhere.com', samesite='None', secure=True,max_age=86400)
         response.data={
             'jwt':token,
             'firstName':user.first_name,
@@ -52,6 +52,8 @@ class CustomerView(APIView):
     def get(self,request):
 
         token=request.COOKIES.get('jwt')
+        print('Token',token)
+
         if not token:
             raise AuthenticationFailed('NOT AUTHENTICATED')
         try:

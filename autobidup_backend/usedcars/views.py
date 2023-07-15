@@ -1,15 +1,11 @@
 import jwt,datetime
-from datetime import datetime
 from users.models import Customer
-from django.template import loader
 from rest_framework.views import APIView
 from .models import UsedCars,key_generator
 from .serializer import UsedCarsSerializer
-from django.contrib.auth.models import User
 from users.serializer import UserSerializer
 from rest_framework import generics, filters
 from rest_framework.response import Response
-from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import AuthenticationFailed
 from django_filters.rest_framework import DjangoFilterBackend
@@ -89,6 +85,10 @@ class create_post(APIView):
         Ckey='C'+str(key)
         new_recd=UsedCars(cname=cname,cid=Ckey,bodytype=bodytype,reg_city=reg_city,city=city,color=color,mileage=mileage,year=year,make=make,model=model,created_at=created_at, variant=variant, engine_type=engine_type,engine_capacity=engine_capacity,transmission=transmission,assembly=assembly,description=description,seller_name=seller_name,seller_phone=seller_phone,price=price,images=images,airbags=airbags,airconditioner=airconditioner, alloywheels=alloywheels, antilockbreakingsystem=antilockbreakingsystem,coolbox=coolbox,cupholders=cupholders,foldingrearseat=foldingrearseat,immobilizer=immobilizer,powerdoorlocks=powerdoorlocks,powersteering=powersteering,powerwindows=powerwindows,powermirrors=powermirrors,rearwiper=rearwiper,tractioncontrol=tractioncontrol, rearseatent=rearseatent, climatecontrol=climatecontrol,rearacvents=rearacvents,frontspeaker=frontspeaker,rearspeaker=rearspeaker,armrests=armrests)
         new_recd.save()
+        # images = request.FILES.getlist('images')  # Retrieve multiple uploaded images
+        # for image in images:
+        #     used_car_image_instance = used_car_image.objects.create(image=image)
+        #     new_recd.images.add(used_car_image_instance)
         return Response({
             'message':'post created successfully!'
         })

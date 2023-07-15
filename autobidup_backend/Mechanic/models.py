@@ -15,7 +15,7 @@ class Mechanic(models.Model):
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=20)
     mechanic_id = models.CharField(max_length=5)
-    assigned_customer_id= models.CharField(max_length=100)
+    assigned_customer_id= models.CharField(max_length=100,blank=True)
     available = models.BooleanField(default=False)
     assigned_m_ticket_id= models.CharField(max_length=100,blank=True)
 
@@ -41,4 +41,3 @@ class Expert(models.Model):
 
 
 
-    

@@ -1,51 +1,158 @@
-import jwt,datetime
+import jwt
+import datetime
 from users.models import Customer
 from rest_framework.views import APIView
 from users.serializer import UserSerializer
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
-from .serializer import CarSerializer,CalenderSerializer
 from rest_framework.exceptions import AuthenticationFailed
-from .models import bidding_car,key_generator,bidding_calender,bidding_room,room_generator
+from rest_framework.parsers import MultiPartParser, FormParser
+from .serializer import CarSerializer,CalenderSerializer,RoomSerializer
+from .models import bidding_car,key_generator,bidding_calender,bidding_room,room_generator,bidding_car_image
 
 
 class RegisterMiniForm(APIView):
-    def post(self,request):
-        token=request.COOKIES.get('jwt')
+
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
         if not token:
             raise AuthenticationFailed('NOT AUTHENTICATED')
+
         try:
-            payload=jwt.decode(token,'secret',algorithms=['HS256'])
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
             raise AuthenticationFailed('NOT AUTHENTICATED')
-        user=Customer.objects.filter(username=payload['username']).first()
-        serializer=UserSerializer(user)
-        dphone_no=serializer.data['contact']
-        f_name=serializer.data['first_name']
-        l_name=serializer.data['last_name']
-        dname=f_name+' '+l_name
-        dchassis_no=request.data['chassis_no']
-        dengine_no=request.data['engine_no']
-        dyear=request.data['year']
-        dmake=request.data['make']
-        dmodel=request.data['model']
-        dmileage=request.data['mileage']+' km'
-        dmodified=request.data['modified']
-        dcar_location=request.data['car_location']
-        dcar_type=request.data['car_type']
-        key=key_generator()
-        key='B'+str(key)
+
+        user = Customer.objects.filter(username=payload['username']).first()
+        serializer = UserSerializer(user)
+        dphone_no = serializer.data['contact']
+        f_name = serializer.data['first_name']
+        l_name = serializer.data['last_name']
+        username1 = serializer.data['username']
+        dname = f_name + ' ' + l_name
+        dchassis_no = request.data['chassis_no']
+        dengine_no = request.data['engine_no']
+        dyear = request.data['year']
+        dmake = request.data['make']
+        dmodel = request.data['model']
+        dmileage = request.data['mileage'] + ' km'
+        dmodified = request.data['modified']
+        dcar_location = request.data['car_location']
+        dcar_type = request.data['car_type']
+        key = key_generator()
+        key = 'B' + str(key)
+
         if dchassis_no == '':
-            raise AuthenticationFailed('Chasis numner Cannot be empty')
-        new_recd=bidding_car(automatic_generated_bid_id=key,name=dname,phone_no=dphone_no,chassis_no=dchassis_no,engine_no=dengine_no,year=dyear,make=dmake,model=dmodel,mileage=dmileage,modified=dmodified,car_type=dcar_type,car_location=dcar_location)
-        new_recd.save()
-        return Response({
-            'asd':'asd'
-        })
+            raise AuthenticationFailed('Chassis number cannot be empty')
+
+        new_recd = bidding_car(
+            automatic_generated_bid_id=key,
+            username=username1,
+            name=dname,
+            phone_no=dphone_no,
+            chassis_no=dchassis_no,
+            engine_no=dengine_no,
+            year=dyear,
+            make=dmake,
+            model=dmodel,
+            mileage=dmileage,
+            modified=dmodified,
+            car_type=dcar_type,
+            car_location=dcar_location
+        )
+
+        new_recd.save()  # Save the bidding_car object to generate an id
+
+
+        return Response({'name': new_recd.name,
+            'automatic_generated_bid_id': new_recd.automatic_generated_bid_id,
+            'username': new_recd.username,
+            'phone_no': new_recd.phone_no,
+            'chassis_no': new_recd.chassis_no,
+            'engine_no': new_recd.engine_no,
+            'year': new_recd.year,
+            'make': new_recd.make,
+            'model': new_recd.model,
+            'mileage': new_recd.mileage,
+            'modified': new_recd.modified,
+            'car_type': new_recd.car_type,
+            'car_location': new_recd.car_location,})
+
+
+
+class RecordDetailsAPI(APIView):
+    def get(self, request):
+        bid_id=request.data['id']
+        record = bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
+        if not record:
+            return Response({'message': 'Record not found.'}, status=404)
+
+        record_data = {
+            'name': record.name,
+            'phone_no': record.phone_no,
+            'chassis_no': record.chassis_no,
+            'engine_no': record.engine_no,
+            'year': record.year,
+            'make': record.make,
+            'model': record.model,
+            'mileage': record.mileage,
+            'modified': record.modified,
+            'car_type': record.car_type,
+            'car_location': record.car_location,
+            # Include other fields as needed
+        }
+
+        images = bidding_car_image.objects.filter(bidding_car__automatic_generated_bid_id=bid_id)
+        image_urls = [image.image.url for image in images]
+
+        data = {
+            'record_details': record_data,
+            'image_urls': image_urls
+        }
+
+        return Response(data)
+
+class RecordDetailsAPIusername(APIView):
+    def get(self, request):
+        token = request.COOKIES.get('jwt')
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+
+        user = Customer.objects.filter(username=payload['username']).first()
+        serializer = UserSerializer(user)
+        uname = serializer.data['username']
+        print(uname)
+        record = bidding_car.objects.filter(username=uname).first()
+        print(record)
+        if not record:
+            return Response({'message': 'Record not found.'}, status=404)
+        record_data = {
+            'name': record.name,
+            'automatic_generated_bid_id': record.automatic_generated_bid_id,
+            'phone_no': record.phone_no,
+            'chassis_no': record.chassis_no,
+            'engine_no': record.engine_no,
+            'year': record.year,
+            'make': record.make,
+            'model': record.model,
+            'mileage': record.mileage,
+            'modified': record.modified,
+            'car_type': record.car_type,
+            'car_location': record.car_location,
+        }
+
+
+        return Response(record_data)
 
 
 class RegisterMainForm(APIView):
+    parser_classes = [MultiPartParser, FormParser]
     def post(self,request):
         token=request.COOKIES.get('jwt')
         if not token:
@@ -61,7 +168,8 @@ class RegisterMainForm(APIView):
             pass
         else:
             raise AuthenticationFailed('Mini Form not complete')
-
+        images = request.FILES.getlist('images')
+        print(images)
         engine_typex=request.data['engine_typex']
         transmissionx=request.data['transmissionx']
         engine_capacityx=request.data['engine_capacityx']+' cc'
@@ -114,10 +222,16 @@ class RegisterMainForm(APIView):
         car.bid_date =bid_datx
         car.bid_time =bid_timex
         car.save()
+          # Retrieve multiple uploaded images
+        for image in images:
+            bidding_car_image_instance = bidding_car_image.objects.create(image=image)
+            car.images.add(bidding_car_image_instance)
+
         create_bidding_calender(car)
         return Response({
             'asd':'asd'
         })
+
 
 
 class AcceptMiniForm(APIView):
@@ -168,9 +282,9 @@ class show_all_bidding_cars(ListAPIView):
     serializer_class=CarSerializer
 
 
-class show_bidding_calender(ListAPIView):
-    queryset=bidding_calender.objects.all()
-    serializer_class=CalenderSerializer
+class show_bidding_rooms(ListAPIView):
+    queryset=bidding_room.objects.all()
+    serializer_class=RoomSerializer
 
 
 class search_bidding_calender(ListAPIView):
@@ -208,6 +322,8 @@ class allot_bidding_room(APIView):
         new_room.engine_type =car.engine_type
         new_room.engine_capacity =car.engine_capacity
         new_room.transmission =car.transmission
+        new_room.start_date =car.bid_date
+        new_room.start_time =car.bid_time
         new_room.assembly =car.assembly
         new_room.ad_title =car.ad_title
         new_room.ad_description =car.ad_description

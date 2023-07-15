@@ -1,24 +1,25 @@
-import jwt,datetime
-from datetime import datetime
+import jwt
+from django.http import JsonResponse
+import requests
 from users.models import Customer
-from django.template import loader
-from django.shortcuts import render
 from rest_framework.views import APIView
-from django.contrib.auth.models import User
-from users.serializer import UserSerializer
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework.filters import SearchFilter
 from rest_framework.exceptions import AuthenticationFailed
 from .models import Mechanic,Mechanic_ticket,key_generator,Expert
-from .serializer import mechanicSerializer,mechanicTicketSerializer,expertSerializer
+from .serializer import expertSerializer,mechanicSerializer
+
+from rest_framework import generics, filters
+
+# Create your views here.
 
 
-
-class show_mechanic(ListAPIView):
+class search_mechanic(generics.ListAPIView):
     queryset=Mechanic.objects.all()
     serializer_class=mechanicSerializer
-    filter_backends=[SearchFilter]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name']
 
 
 class Allot_mechanic(APIView):
@@ -41,7 +42,7 @@ class Allot_mechanic(APIView):
         mec.available=False
         mname=request.data['name']
         maddress=request.data['location']
-        mdecription=request.data['decription']
+        mdecription=request.data['description']
         mphone=request.data['phone']
         mm_id=user.alloted_mechanic
         key=key_generator()
@@ -51,7 +52,7 @@ class Allot_mechanic(APIView):
         mec.assigned_m_ticket_id=key
         mec.save()
         return Response({
-            'Success'
+            'Mechanic id': mm_id
         })
 
 
@@ -136,3 +137,21 @@ class request_call(APIView):
             'Assigined to':expert.assigned_customer_id  ,
             'left calls':  user.call_credit ,
         })
+
+class get_location(APIView):
+    def post(self,request):
+        API_KEY = 'AIzaSyBzpF6wYSz1YjJ-9gZuzEwc4YIIFuj7NMA'
+        ADDRESS = request.data['address']
+        url = f'https://maps.googleapis.com/maps/api/geocode/json?address={ADDRESS}&key={API_KEY}'
+        # url = f'https://www.googleapis.com/geolocation/v1/geolocate?key={api_key}'
+
+        response = requests.post(url)
+        data = response.json()
+        print(data)
+
+        if 'results' in data:
+            lat = data['results'][0]['geometry']['location']['lat']
+            lng = data['results'][0]['geometry']['location']['lng']
+            return JsonResponse({'latitude': lat, 'longitude': lng})
+        else:
+            return JsonResponse({'error': 'Unable to get current location'}, status=500)

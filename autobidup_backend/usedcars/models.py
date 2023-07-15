@@ -52,3 +52,9 @@ class UsedCars(models.Model):
     frontspeaker = models.BooleanField(default=False, null=True, blank=True)
     rearspeaker = models.BooleanField(default=False, null=True, blank=True)
     armrests = models.BooleanField(default=False, null=True, blank=True)
+#     images = models.ManyToManyField('used_car_image', blank=True)
+
+
+
+# class used_car_image(models.Model):
+#     image = models.ImageField(upload_to='car_images/')

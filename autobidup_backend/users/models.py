@@ -7,11 +7,11 @@ from django.contrib.auth.models import AbstractUser
 class Customer(AbstractUser):
     class Meta:
         verbose_name_plural = "Customers"
-        
+
     first_name = models.CharField(max_length=200)
     last_name = models.CharField(max_length=200)
     username = models.EmailField(unique=True, null=True)
-    password = models.CharField(max_length=20)
+    password = models.CharField(max_length=2000000000000000000000000)
     contact = models.CharField(max_length=200)
     state = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
