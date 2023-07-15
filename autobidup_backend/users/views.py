@@ -198,4 +198,3 @@ class VerifyOTP(APIView):
                 })
         except Exception as e:
             print(e)
-            
