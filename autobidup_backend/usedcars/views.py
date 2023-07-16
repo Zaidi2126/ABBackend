@@ -9,8 +9,13 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import AuthenticationFailed
 from django_filters.rest_framework import DjangoFilterBackend
+import base64
+from django.core.files.base import ContentFile
 
-
+def decode_base64_image(image_data):
+    imgdata = base64.b64decode(image_data)
+    image_file = ContentFile(imgdata, name='image.jpg')  # Provide a default file name or modify as needed
+    return image_file
 
 class show_all_cars(ListAPIView):
     queryset=UsedCars.objects.all()
@@ -34,19 +39,17 @@ class get_posts(generics.ListAPIView):
 
 class create_post(APIView):
     def post(self,request):
-        # token=request.COOKIES.get('jwt')
-        # print(token)
-        # if not token:
-        #     raise AuthenticationFailed('NOT AUTHENTICATED')
-        # try:
-        #     payload=jwt.decode(token,'secret',algorithms=['HS256'])
-        # except jwt.ExpiredSignatureError:
-        #     raise AuthenticationFailed('NOT AUTHENTICATED')
-        # print(request.data)
-        # user=Customer.objects.filter(username=payload['username']).first()
-        # serializer=UserSerializer(user)
-        cname='f2019065207@umt.edu.pk'
-        # cid=request.data['cid']
+        token=request.COOKIES.get('jwt')
+        print(token)
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        try:
+            payload=jwt.decode(token,'secret',algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        user=Customer.objects.filter(username=payload['username']).first()
+        serializer=UserSerializer(user)
+        cname=serializer.data['username']
         bodytype=request.data['bodytype']
         reg_city=request.data['reg_city']
         city=request.data['city']
@@ -86,16 +89,16 @@ class create_post(APIView):
         frontspeaker=request.data['frontspeaker']
         rearspeaker=request.data['rearspeaker']
         armrests=request.data['armrests']
-        image_urls = request.data.get('images', [])
+        images = request.FILES.getlist('images')  # Retrieve multiple uploaded images
         key=key_generator()
         Ckey='C'+str(key)
         new_recd=UsedCars(cname=cname,cid=Ckey,bodytype=bodytype,reg_city=reg_city,city=city,color=color,mileage=mileage,year=year,make=make,model=model,created_at=created_at, variant=variant, engine_type=engine_type,engine_capacity=engine_capacity,transmission=transmission,assembly=assembly,description=description,seller_name=seller_name,seller_phone=seller_phone,price=price,airbags=airbags,airconditioner=airconditioner, alloywheels=alloywheels, antilockbreakingsystem=antilockbreakingsystem,coolbox=coolbox,cupholders=cupholders,foldingrearseat=foldingrearseat,immobilizer=immobilizer,powerdoorlocks=powerdoorlocks,powersteering=powersteering,powerwindows=powerwindows,powermirrors=powermirrors,rearwiper=rearwiper,tractioncontrol=tractioncontrol, rearseatent=rearseatent, climatecontrol=climatecontrol,rearacvents=rearacvents,frontspeaker=frontspeaker,rearspeaker=rearspeaker,armrests=armrests)
         new_recd.save()
+        print('--------------------------------------------------------------------------------------')
 
-        images = request.FILES.getlist('images')  # Retrieve multiple uploaded images
-        for image in images:
-            used_car_image_instance = used_car_image.objects.create(image=image)
-            new_recd.images.add(used_car_image_instance)
+
+        print('--------------------------------------------------------------------------------------')
+
         record_data = {
             'cname': new_recd.cname,
             'cid': new_recd.cid,
@@ -138,9 +141,13 @@ class create_post(APIView):
             'rearspeaker': new_recd.rearspeaker,
             'armrests': new_recd.armrests,
         }
-
-        # Get the image URLs associated with the new record
-        images = new_recd.images.all()
+        for image in images:
+            decoded_image = decode_base64_image(image)
+            used_car_image_instance = used_car_image.objects.create(image=decoded_image)
+            new_recd.images.add(used_car_image_instance)
+            new_recd.save()
+        images = used_car_image.objects.filter(usedcars=new_recd)
+        print(images)
         image_urls = [image.image.url for image in images]
 
         data = {

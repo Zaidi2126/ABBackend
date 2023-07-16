@@ -51,22 +51,19 @@ class UsedCars(models.Model):
     frontspeaker = models.BooleanField(default=False, null=True, blank=True)
     rearspeaker = models.BooleanField(default=False, null=True, blank=True)
     armrests = models.BooleanField(default=False, null=True, blank=True)
-    images = models.ManyToManyField('used_car_image', related_name='cars', blank=True)
+    images = models.ManyToManyField('used_car_image', blank=True)
 
 
 
 class used_car_image(models.Model):
-    image = models.ImageField(upload_to='car_images/')
+    image = models.ImageField(upload_to='used_car_image/')
+    def __str__(self):
+        return f"Image {self.id}"
 
 
 
 
 
-
-
-
-class ImageModel(models.Model):
-    image_data = models.TextField()
 
 
 

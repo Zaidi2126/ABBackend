@@ -289,21 +289,26 @@ class show_all_bidding_cars(ListAPIView):
 class show_bidding_rooms(ListAPIView):
     queryset=bidding_room.objects.all()
     serializer_class=RoomSerializer
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 
+class RoomIdAllotedAPIView(APIView):
+    def get(self, request):
+        records = bidding_car.objects.filter(room_id_alloted=True)
+        serializer = CarSerializer(records, many=True)
+        return Response(serializer.data)
 
-class search_bidding_calender(ListAPIView):
-    queryset=bidding_calender.objects.all()
-    serializer_class=CalenderSerializer
-    filter_backends=[SearchFilter]
-    search_fields=['automatic_generated_bid_id','chassis_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
-
+class search_bidding_room(ListAPIView):
+    queryset=bidding_room.objects.all()
+    serializer_class=RoomSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields=['room_id']
 
 class search_all_bidding_cars(ListAPIView):
     queryset=bidding_car.objects.all()
     serializer_class=CarSerializer
-    filter_backends=[SearchFilter]
-    search_fields=['automatic_generated_bid_id','name','phone_no','chassis_no','engine_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','car_location','miniform_approved','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
-
+    filter_backends = [filters.SearchFilter]
+    search_fields=['automatic_generated_bid_id']
 
 
 
@@ -363,8 +368,7 @@ class enter_bidding_room(APIView):
             raise AuthenticationFailed('NOT AUTHENTICATED')
         user=Customer.objects.filter(username=payload['username']).first()
         bid_id=request.data['bids']
-        car=bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
-        user.entred_bidding_room_id=car.room_id
+        user.entred_bidding_room_id=bid_id
         user.current_bid='0'
         user.save()
         return Response({
@@ -601,6 +605,63 @@ class RegisterMainForm(APIView):
 
 
 
+from rest_framework.decorators import api_view
+
+@api_view(['GET'])
+def get_bidding_records_roomid(request):
+    room_id = request.data['bids']
+    print(room_id)
+    # Get the bidding_room record
+    try:
+        room_record = bidding_room.objects.filter(room_id=room_id).first()
+        print(room_record)
+        print(room_record)
+    #     bidding_rooms= {
+    #     "room_id":room_record.room_id,
+    #     "automatic_generated_bid_id":room_record.automatic_generated_bid_id,
+    #     "year":room_record.year,
+    #     "make":room_record.make,
+    #     "model":room_record.model,
+    #     "mileage":room_record.mileage,
+    #     "modified":room_record.modified,
+    #     "car_type":room_record.car_type,
+    #     "engine_type":room_record.engine_type,
+    #     "engine_capacity":room_record.engine_capacity,
+    #     "transmission":room_record.transmission,
+    #     "assembly":room_record.assembly,
+    #     "ad_title":room_record.ad_title,
+    #     "bid_datetime_left":room_record.bid_datetime_left,
+    #     "start_date":room_record.start_date,
+    #     "start_time":room_record.start_time,
+    #     "starting_bid":room_record.starting_bid,
+    #     "increase_bid":room_record.increase_bid,
+    #     "higest_bid":room_record.higest_bid,
+    #     "highest_bidder":room_record.highest_bidder,
+    #     "bid_winner":room_record.bid_winner,
+    #     "current_bid":room_record.current_bid,
+    #     }
+    # except:
+    #     pass
+
+    except bidding_room.DoesNotExist:
+        return Response({'message': 'No bidding_room record found with the given room_id'}, status=404)
+
+    # Get the bidding_car record
+    try:
+        car_record = bidding_car.objects.filter(room_id=room_id).first()
+    except bidding_car.DoesNotExist:
+        return Response({'message': 'No bidding_car record found with the given room_id'}, status=404)
+
+    # Serialize the records
+
+    room_serializer = RoomSerializer(room_record)
+    car_serializer = CarSerializer(car_record)
+
+    # Return the serialized records as the response
+    return Response({
+        'bidding_room': room_serializer.data,
+        'bidding_car': car_serializer.data
+    })
 
 
 
