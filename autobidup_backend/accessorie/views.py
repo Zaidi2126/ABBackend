@@ -5,7 +5,7 @@ from datetime import datetime
 from users.models import Customer
 from django.template import loader
 from django.shortcuts import render
-from .serializer import StoreSerializer
+from .serializer import StoreSerializer, OrderSerializer
 from rest_framework.views import APIView
 from users.serializer import UserSerializer
 from django.contrib.auth.models import User
@@ -32,6 +32,11 @@ class search_products(generics.ListAPIView):
         'price': ['gte', 'lte'],
     }
 
+class get_orders(generics.ListAPIView):
+    queryset=Order.objects.all()
+    serializer_class=OrderSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['cname']
 
 class search_product_type(generics.ListAPIView):
     queryset=Products.objects.all()

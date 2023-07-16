@@ -1,7 +1,7 @@
 import jwt,datetime
 from users.models import Customer
 from rest_framework.views import APIView
-from .models import UsedCars,key_generator
+from .models import UsedCars,key_generator,used_car_image
 from .serializer import UsedCarsSerializer
 from users.serializer import UserSerializer
 from rest_framework import generics, filters
@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import AuthenticationFailed
 from django_filters.rest_framework import DjangoFilterBackend
+
 
 
 class show_all_cars(ListAPIView):
@@ -25,22 +26,26 @@ class search_cars(generics.ListAPIView):
         'price': ['gte', 'lte'],
         'year': ['gte', 'lte'],
     }
-
+class get_posts(generics.ListAPIView):
+    queryset=UsedCars.objects.all()
+    serializer_class=UsedCarsSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['cname']
 
 class create_post(APIView):
     def post(self,request):
-        token=request.COOKIES.get('jwt')
-        print(token)
-        if not token:
-            raise AuthenticationFailed('NOT AUTHENTICATED')
-        try:
-            payload=jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('NOT AUTHENTICATED')
-        print(request.data)
-        user=Customer.objects.filter(username=payload['username']).first()
-        serializer=UserSerializer(user)
-        cname=serializer.data['username']
+        # token=request.COOKIES.get('jwt')
+        # print(token)
+        # if not token:
+        #     raise AuthenticationFailed('NOT AUTHENTICATED')
+        # try:
+        #     payload=jwt.decode(token,'secret',algorithms=['HS256'])
+        # except jwt.ExpiredSignatureError:
+        #     raise AuthenticationFailed('NOT AUTHENTICATED')
+        # print(request.data)
+        # user=Customer.objects.filter(username=payload['username']).first()
+        # serializer=UserSerializer(user)
+        cname='f2019065207@umt.edu.pk'
         # cid=request.data['cid']
         bodytype=request.data['bodytype']
         reg_city=request.data['reg_city']
@@ -81,17 +86,69 @@ class create_post(APIView):
         frontspeaker=request.data['frontspeaker']
         rearspeaker=request.data['rearspeaker']
         armrests=request.data['armrests']
+        image_urls = request.data.get('images', [])
         key=key_generator()
         Ckey='C'+str(key)
-        new_recd=UsedCars(cname=cname,cid=Ckey,bodytype=bodytype,reg_city=reg_city,city=city,color=color,mileage=mileage,year=year,make=make,model=model,created_at=created_at, variant=variant, engine_type=engine_type,engine_capacity=engine_capacity,transmission=transmission,assembly=assembly,description=description,seller_name=seller_name,seller_phone=seller_phone,price=price,images=images,airbags=airbags,airconditioner=airconditioner, alloywheels=alloywheels, antilockbreakingsystem=antilockbreakingsystem,coolbox=coolbox,cupholders=cupholders,foldingrearseat=foldingrearseat,immobilizer=immobilizer,powerdoorlocks=powerdoorlocks,powersteering=powersteering,powerwindows=powerwindows,powermirrors=powermirrors,rearwiper=rearwiper,tractioncontrol=tractioncontrol, rearseatent=rearseatent, climatecontrol=climatecontrol,rearacvents=rearacvents,frontspeaker=frontspeaker,rearspeaker=rearspeaker,armrests=armrests)
+        new_recd=UsedCars(cname=cname,cid=Ckey,bodytype=bodytype,reg_city=reg_city,city=city,color=color,mileage=mileage,year=year,make=make,model=model,created_at=created_at, variant=variant, engine_type=engine_type,engine_capacity=engine_capacity,transmission=transmission,assembly=assembly,description=description,seller_name=seller_name,seller_phone=seller_phone,price=price,airbags=airbags,airconditioner=airconditioner, alloywheels=alloywheels, antilockbreakingsystem=antilockbreakingsystem,coolbox=coolbox,cupholders=cupholders,foldingrearseat=foldingrearseat,immobilizer=immobilizer,powerdoorlocks=powerdoorlocks,powersteering=powersteering,powerwindows=powerwindows,powermirrors=powermirrors,rearwiper=rearwiper,tractioncontrol=tractioncontrol, rearseatent=rearseatent, climatecontrol=climatecontrol,rearacvents=rearacvents,frontspeaker=frontspeaker,rearspeaker=rearspeaker,armrests=armrests)
         new_recd.save()
-        # images = request.FILES.getlist('images')  # Retrieve multiple uploaded images
-        # for image in images:
-        #     used_car_image_instance = used_car_image.objects.create(image=image)
-        #     new_recd.images.add(used_car_image_instance)
-        return Response({
-            'message':'post created successfully!'
-        })
+
+        images = request.FILES.getlist('images')  # Retrieve multiple uploaded images
+        for image in images:
+            used_car_image_instance = used_car_image.objects.create(image=image)
+            new_recd.images.add(used_car_image_instance)
+        record_data = {
+            'cname': new_recd.cname,
+            'cid': new_recd.cid,
+            'bodytype': new_recd.bodytype,
+            'reg_city': new_recd.reg_city,
+            'city': new_recd.city,
+            'color': new_recd.color,
+            'mileage': new_recd.mileage,
+            'year': new_recd.year,
+            'make': new_recd.make,
+            'model': new_recd.model,
+            'created_at': new_recd.created_at,
+            'variant': new_recd.variant,
+            'engine_type': new_recd.engine_type,
+            'engine_capacity': new_recd.engine_capacity,
+            'transmission': new_recd.transmission,
+            'assembly': new_recd.assembly,
+            'description': new_recd.description,
+            'seller_name': new_recd.seller_name,
+            'seller_phone': new_recd.seller_phone,
+            'price': new_recd.price,
+            'airbags': new_recd.airbags,
+            'airconditioner': new_recd.airconditioner,
+            'alloywheels': new_recd.alloywheels,
+            'antilockbreakingsystem': new_recd.antilockbreakingsystem,
+            'coolbox': new_recd.coolbox,
+            'cupholders': new_recd.cupholders,
+            'foldingrearseat': new_recd.foldingrearseat,
+            'immobilizer': new_recd.immobilizer,
+            'powerdoorlocks': new_recd.powerdoorlocks,
+            'powersteering': new_recd.powersteering,
+            'powerwindows': new_recd.powerwindows,
+            'powermirrors': new_recd.powermirrors,
+            'rearwiper': new_recd.rearwiper,
+            'tractioncontrol': new_recd.tractioncontrol,
+            'rearseatent': new_recd.rearseatent,
+            'climatecontrol': new_recd.climatecontrol,
+            'rearacvents': new_recd.rearacvents,
+            'frontspeaker': new_recd.frontspeaker,
+            'rearspeaker': new_recd.rearspeaker,
+            'armrests': new_recd.armrests,
+        }
+
+        # Get the image URLs associated with the new record
+        images = new_recd.images.all()
+        image_urls = [image.image.url for image in images]
+
+        data = {
+            'record_details': record_data,
+            'image_urls': image_urls
+        }
+
+        return Response(data)
 
 
 class remove_post(APIView):
@@ -143,7 +200,8 @@ class edit_post(APIView):
         existing_post.seller_name = request.data.get('seller_name', existing_post.seller_name)
         existing_post.seller_phone = request.data.get('seller_phone', existing_post.seller_phone)
         existing_post.price = request.data.get('price', existing_post.price)
-        existing_post.images = request.data.get('images', existing_post.images)
+        image_ids = request.FILES.getlist('images')
+        existing_post.images.set(image_ids)
         existing_post.airbags = request.data.get('airbags', existing_post.airbags)
         existing_post.airconditioner = request.data.get('airconditioner', existing_post.airconditioner)
         existing_post.alloywheels = request.data.get('alloywheels', existing_post.alloywheels)

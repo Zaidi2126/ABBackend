@@ -62,6 +62,9 @@ class bidding_car(models.Model):
 class bidding_car_image(models.Model):
     image = models.ImageField(upload_to='bidding_car_images/')
 
+    def __str__(self):
+        return f"Image {self.id}"
+
 class bidding_calender(models.Model):
     chassis_no = models.CharField(max_length=100)
     automatic_generated_bid_id = models.CharField(max_length=5)
@@ -114,4 +117,9 @@ class bidding_room(models.Model):
     highest_bidder=models.CharField(max_length=100, default='' ,blank=True)
     bid_winner = models.CharField(max_length=100, default='' ,blank=True)
     current_bid = models.CharField(max_length=100, default='' ,blank=True)
+
+
+class ImageModel(models.Model):
+    image_data = models.TextField()
+
 

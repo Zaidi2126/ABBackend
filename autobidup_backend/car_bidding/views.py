@@ -151,86 +151,90 @@ class RecordDetailsAPIusername(APIView):
         return Response(record_data)
 
 
-class RegisterMainForm(APIView):
-    parser_classes = [MultiPartParser, FormParser]
-    def post(self,request):
-        token=request.COOKIES.get('jwt')
-        if not token:
-            raise AuthenticationFailed('NOT AUTHENTICATED')
-        try:
-            payload=jwt.decode(token,'secret',algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('NOT AUTHENTICATED')
-        bid_id=request.data['bids']
-        car=bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
+# class RegisterMainForm(APIView):
+#     parser_classes = [MultiPartParser, FormParser]
+#     def post(self,request):
+#         token=request.COOKIES.get('jwt')
+#         print('token-----------------------------------------------',token)
+#         if not token:
+#             raise AuthenticationFailed('NOT AUTHENTICATED')
+#         try:
+#             payload=jwt.decode(token,'secret',algorithms=['HS256'])
+#         except jwt.ExpiredSignatureError:
+#             raise AuthenticationFailed('NOT AUTHENTICATED')
+#         bid_id=request.data['bids']
+#         car=bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
 
-        if car.miniform_approved==True:
-            pass
-        else:
-            raise AuthenticationFailed('Mini Form not complete')
-        images = request.FILES.getlist('images')
-        print(images)
-        engine_typex=request.data['engine_typex']
-        transmissionx=request.data['transmissionx']
-        engine_capacityx=request.data['engine_capacityx']+' cc'
-        assemblyx=request.data['assemblyx']
-        ad_titlex=request.data['ad_titlex']
-        ad_descriptionx=request.data['ad_descriptionx']
-        bid_datx=request.data['bid_datx']
-        bid_timex=request.data['bid_timex']
-        starting_bid=request.data['staring_bid']+' rps'
+#         if car.miniform_approved==True:
+#             pass
+#         else:
+#             raise AuthenticationFailed('Mini Form not complete')
+#         images = request.FILES.getlist('images')
+#         engine_typex=request.data['engine_typex']
+#         transmissionx=request.data['transmissionx']
+#         engine_capacityx=request.data['engine_capacityx']+' cc'
+#         assemblyx=request.data['assemblyx']
+#         ad_titlex=request.data['ad_titlex']
+#         ad_descriptionx=request.data['ad_descriptionx']
+#         bid_datx=request.data['bid_datx']
+#         bid_timex=request.data['bid_timex']
+#         starting_bid=request.data['staring_bid']+' rps'
 
+#         print('------------------------------------------------------------------------------')
+#         if 'airbagsx' in request.data:
+#             airbagsx=request.data['airbagsx']
+#             car.airbags =airbagsx
 
-        if 'airbagsx' in request.data:
-            airbagsx=request.data['airbagsx']
-            car.airbags =airbagsx
+#         if 'alloy_wheelsx' in request.data:
+#             alloy_wheelsx=request.data['alloy_wheelsx']
+#             car.alloy_wheels =alloy_wheelsx
 
-        if 'alloy_wheelsx' in request.data:
-            alloy_wheelsx=request.data['alloy_wheelsx']
-            car.alloy_wheels =alloy_wheelsx
+#         if 'immoblizerx' in request.data:
+#             immoblizerx=request.data['immoblizerx']
+#             car.immoblizer =immoblizerx
 
-        if 'immoblizerx' in request.data:
-            immoblizerx=request.data['immoblizerx']
-            car.immoblizer =immoblizerx
+#         if 'acx' in request.data:
+#             acx=request.data['acx']
+#             car.ac =acx
 
-        if 'acx' in request.data:
-            acx=request.data['acx']
-            car.ac =acx
+#         if 'cool_boxx' in request.data:
+#             cool_boxx=request.data['cool_boxx']
+#             car.cool_box =cool_boxx
 
-        if 'cool_boxx' in request.data:
-            cool_boxx=request.data['cool_boxx']
-            car.cool_box =cool_boxx
+#         if 'folding_seatsx' in request.data:
+#             folding_seatsx=request.data['folding_seatsx']
+#             car.folding_seats =folding_seatsx
 
-        if 'folding_seatsx' in request.data:
-            folding_seatsx=request.data['folding_seatsx']
-            car.folding_seats =folding_seatsx
+#         if 'power_door_locksx' in request.data:
+#             power_door_locksx=request.data['power_door_locksx']
+#             car.power_door_locks =power_door_locksx
 
-        if 'power_door_locksx' in request.data:
-            power_door_locksx=request.data['power_door_locksx']
-            car.power_door_locks =power_door_locksx
+#         if 'antibrakingsystemx' in request.data:
+#             antibrakingsystemx=request.data['antibrakingsystemx']
+#             car.antibrakingsystem=antibrakingsystemx
+#         print('------------------------------------------------------------------------------')
+#         car.engine_type =engine_typex
+#         car.engine_capacity =engine_capacityx
+#         car.transmission =transmissionx
+#         car.assembly =assemblyx
+#         car.ad_title =ad_titlex
+#         car.starting_bid =starting_bid
+#         car.ad_description =ad_descriptionx
+#         car.bid_date =bid_datx
+#         car.bid_time =bid_timex
+#         car.save()
+#         print('------------------------------------------------------------------------------')
+#         #   Retrieve multiple uploaded images
+#         for image in images:
+#             temp=base64_to_image(image)
+#             bidding_car_image_instance = bidding_car_image.objects.create(image=image)
+#             car.images.add(bidding_car_image_instance)
+#         print('------------------------------------------------------------------------------')
 
-        if 'antibrakingsystemx' in request.data:
-            antibrakingsystemx=request.data['antibrakingsystemx']
-            car.antibrakingsystem=antibrakingsystemx
-        car.engine_type =engine_typex
-        car.engine_capacity =engine_capacityx
-        car.transmission =transmissionx
-        car.assembly =assemblyx
-        car.ad_title =ad_titlex
-        car.starting_bid =starting_bid
-        car.ad_description =ad_descriptionx
-        car.bid_date =bid_datx
-        car.bid_time =bid_timex
-        car.save()
-          # Retrieve multiple uploaded images
-        for image in images:
-            bidding_car_image_instance = bidding_car_image.objects.create(image=image)
-            car.images.add(bidding_car_image_instance)
-
-        create_bidding_calender(car)
-        return Response({
-            'asd':'asd'
-        })
+#         create_bidding_calender(car)
+#         return Response({
+#             'asd':'asd'
+#         })
 
 
 
@@ -301,47 +305,51 @@ class search_all_bidding_cars(ListAPIView):
     search_fields=['automatic_generated_bid_id','name','phone_no','chassis_no','engine_no','automatic_generated_bid_id','year','make','model','mileage','modified','car_type','car_location','miniform_approved','engine_type','engine_capacity','transmission','assembly','ad_title','ad_description','bid_date','bid_time','airbags','alloy_wheels','immoblizer','ac','cool_box','folding_seats','power_door_locks','antibrakingsystem',]
 
 
-class allot_bidding_room(APIView):
-    def post(self,request):
-        automatic_generated_bid_id=request.data['bids']
-        car=bidding_car.objects.filter(automatic_generated_bid_id=automatic_generated_bid_id).first()
 
-        if len(car.room_id) > 1:
-            raise AuthenticationFailed('Room already alloted')
-        else:
-            pass
-        new_room=bidding_room.objects.create()
-        new_room.room_id=room_generator()
-        new_room.automatic_generated_bid_id=car.automatic_generated_bid_id
-        new_room.year =car.year
-        new_room.make =car.make
-        new_room.model =car.model
-        new_room.mileage =car.mileage
-        new_room.modified =car.modified
-        new_room.car_type =car.car_type
-        new_room.engine_type =car.engine_type
-        new_room.engine_capacity =car.engine_capacity
-        new_room.transmission =car.transmission
-        new_room.start_date =car.bid_date
-        new_room.start_time =car.bid_time
-        new_room.assembly =car.assembly
-        new_room.ad_title =car.ad_title
-        new_room.ad_description =car.ad_description
-        new_room.bid_time =car.bid_time
-        new_room.bid_date =car.bid_date
-        new_room.starting_bid =car.starting_bid
-        new_room.bid_datetime_left=datetime_diff(car.bid_date,car.bid_time)
-        new_room.increase_bid='50000'
-        new_room.current_bid='0'
-        # new_room.current_bid=new_room.increase_bid
+
+class allot_bidding_room(APIView):
+    def post(self, request):
+        automatic_generated_bid_id = request.data.get('bids')
+        car = bidding_car.objects.filter(automatic_generated_bid_id=automatic_generated_bid_id).first()
+
+        if car is None:
+            return Response({'error': 'Car not found for the given bid ID'})
+
+        if car.room_id_alloted:
+            return Response({'room_id_alloted': 'False'})
+        new_room = bidding_room.objects.create()
+        new_room.room_id = room_generator()
+        new_room.automatic_generated_bid_id = car.automatic_generated_bid_id
+        new_room.year = car.year
+        new_room.make = car.make
+        new_room.model = car.model
+        new_room.mileage = car.mileage
+        new_room.modified = car.modified
+        new_room.car_type = car.car_type
+        new_room.engine_type = car.engine_type
+        new_room.engine_capacity = car.engine_capacity
+        new_room.transmission = car.transmission
+        new_room.start_date = car.bid_date
+        new_room.start_time = car.bid_time
+        new_room.assembly = car.assembly
+        new_room.ad_title = car.ad_title
+        new_room.ad_description = car.ad_description
+        new_room.bid_time = car.bid_time
+        new_room.bid_date = car.bid_date
+        new_room.starting_bid = car.starting_bid
+        new_room.bid_datetime_left = datetime_diff(car.bid_date, car.bid_time)
+        new_room.increase_bid = '50000'
+        new_room.current_bid = '0'
         new_room.save()
-        car.room_id_alloted=True
-        car.room_id=new_room.room_id
+
+        car.room_id_alloted = True
+        car.room_id = new_room.room_id
         car.save()
 
-        return Response({
-            'room_id_alloted':car.room_id
-        })
+        return Response({'room_id_alloted': car.room_id})
+
+
+
 
 
 class enter_bidding_room(APIView):
@@ -402,7 +410,7 @@ class increase_bid(APIView):
 
         highest_bidder_obj=check_highest_bid(room.room_id)
         print(highest_bidder_obj.first_name)
-        user.current_bid='989898989898989898989898989898989'
+        # user.current_bid='989898989898989898989898989898989'
         if int(user.current_bid) > int(highest_bidder_obj.current_bid):
             room.highest_bidder=user.first_name
             room.higest_bid=user.current_bid
@@ -463,3 +471,148 @@ def create_bidding_calender(car):
     new_car.antibrakingsystem =car.antibrakingsystem
     # new_car.bid_time_down=time_diff()
     new_car.save()
+
+
+
+
+
+import base64
+from django.core.files.base import ContentFile
+from rest_framework.views import APIView
+
+
+# def decode_base64_image(image_data):
+#     # Remove the image data prefix (e.g., "data:image/jpeg;base64,")
+#     format, imgstr = image_data.split(';base64,')
+#     # Get the file extension (e.g., "jpeg" or "png")
+#     ext = format.split('/')[-1]
+#     # Create a content file from the Base64-encoded image data
+#     image_file = ContentFile(base64.b64decode(imgstr), name=f'image.{ext}')
+#     return image_file
+
+
+
+
+def decode_base64_image(image_data):
+    # Add padding if necessary
+    # padding = len(image_data) % 4
+    # if padding > 0:
+    #     image_data += '=' * (4 - padding)
+
+    # Decode the Base64-encoded image data
+    imgdata = base64.b64decode(image_data)
+    # Create a content file from the decoded image data
+    image_file = ContentFile(imgdata, name='image.jpg')  # Provide a default file name or modify as needed
+    return image_file
+
+
+class RegisterMainForm(APIView):
+    parser_classes = [MultiPartParser, FormParser]
+
+    def post(self, request):
+        token = request.COOKIES.get('jwt')
+        print('token-----------------------------------------------', token)
+        if not token:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('NOT AUTHENTICATED')
+        bid_id = request.data['bids']
+        car = bidding_car.objects.filter(automatic_generated_bid_id=bid_id).first()
+
+        if car.miniform_approved == True:
+            pass
+        else:
+            raise AuthenticationFailed('Mini Form not complete')
+
+        images = request.POST.getlist('images')
+        engine_typex = request.data['engine_typex']
+        transmissionx = request.data['transmissionx']
+        engine_capacityx = request.data['engine_capacityx'] + ' cc'
+        assemblyx = request.data['assemblyx']
+        ad_titlex = request.data['ad_titlex']
+        ad_descriptionx = request.data['ad_descriptionx']
+        bid_datx = request.data['bid_datx']
+        bid_timex = request.data['bid_timex']
+        starting_bid = request.data['staring_bid'] + ' rps'
+
+        print('------------------------------------------------------------------------------')
+        if 'airbagsx' in request.data:
+            airbagsx = request.data['airbagsx']
+            car.airbags = airbagsx
+
+        if 'alloy_wheelsx' in request.data:
+            alloy_wheelsx = request.data['alloy_wheelsx']
+            car.alloy_wheels = alloy_wheelsx
+
+        if 'immoblizerx' in request.data:
+            immoblizerx = request.data['immoblizerx']
+            car.immoblizer = immoblizerx
+
+        if 'acx' in request.data:
+            acx = request.data['acx']
+            car.ac = acx
+
+        if 'cool_boxx' in request.data:
+            cool_boxx = request.data['cool_boxx']
+            car.cool_box = cool_boxx
+
+        if 'folding_seatsx' in request.data:
+            folding_seatsx = request.data['folding_seatsx']
+            car.folding_seats = folding_seatsx
+
+        if 'power_door_locksx' in request.data:
+            power_door_locksx = request.data['power_door_locksx']
+            car.power_door_locks = power_door_locksx
+
+        if 'antibrakingsystemx' in request.data:
+            antibrakingsystemx = request.data['antibrakingsystemx']
+            car.antibrakingsystem = antibrakingsystemx
+        print('------------------------------------------------------------------------------')
+        car.engine_type = engine_typex
+        car.engine_capacity = engine_capacityx
+        car.transmission = transmissionx
+        car.assembly = assemblyx
+        car.ad_title = ad_titlex
+        car.starting_bid = starting_bid
+        car.ad_description = ad_descriptionx
+        car.bid_date = bid_datx
+        car.bid_time = bid_timex
+        car.save()
+        print('------------------------------------------------------------------------------')
+
+        # Save decoded images and associate them with the bidding_car object
+        for image in images:
+            print(type(image))
+            decoded_image = decode_base64_image(image)
+            bidding_car_image_instance = bidding_car_image.objects.create(image=decoded_image)
+            car.images.add(bidding_car_image_instance)
+        print('------------------------------------------------------------------------------')
+
+        images = bidding_car_image.objects.filter(bidding_car__automatic_generated_bid_id=bid_id)
+        image_urls = [image.image.url for image in images]
+
+        data = {
+            'image_urls': image_urls
+        }
+
+        return Response(data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

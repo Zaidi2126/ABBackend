@@ -32,7 +32,7 @@ class Mechanic_ticket(models.Model):
 class Expert(models.Model):
     name = models.CharField(max_length=100)
     phone_no = models.CharField(max_length=20)
-    description = models.CharField(max_length=5)
+    description = models.TextField()
     skills= models.CharField(max_length=100)
     available = models.BooleanField(default=False)
     e_id=models.CharField(max_length=500, blank=True)

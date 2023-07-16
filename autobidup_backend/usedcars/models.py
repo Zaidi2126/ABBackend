@@ -31,7 +31,6 @@ class UsedCars(models.Model):
     seller_name = models.CharField(max_length=200)
     seller_phone = models.CharField(max_length=50)
     price = models.DecimalField(max_digits=15, decimal_places=2)
-    images = models.ImageField(upload_to='car_images')
     airbags = models.BooleanField(default=False, null=True, blank=True)
     airconditioner = models.BooleanField(default=False, null=True, blank=True)
     alloywheels = models.BooleanField(default=False, null=True, blank=True)
@@ -52,9 +51,30 @@ class UsedCars(models.Model):
     frontspeaker = models.BooleanField(default=False, null=True, blank=True)
     rearspeaker = models.BooleanField(default=False, null=True, blank=True)
     armrests = models.BooleanField(default=False, null=True, blank=True)
-#     images = models.ManyToManyField('used_car_image', blank=True)
+    images = models.ManyToManyField('used_car_image', related_name='cars', blank=True)
 
 
 
-# class used_car_image(models.Model):
-#     image = models.ImageField(upload_to='car_images/')
+class used_car_image(models.Model):
+    image = models.ImageField(upload_to='car_images/')
+
+
+
+
+
+
+
+
+class ImageModel(models.Model):
+    image_data = models.TextField()
+
+
+
+
+
+
+
+
+
+
+
